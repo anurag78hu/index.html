@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anurag Kumar | Ethical Hacker & Pentester</title>
+    <style>
+        :root {
+            --bg-color: #010204;
+            --surface-color: rgba(5, 7, 12, 0.95);
+            --surface-hover: rgba(10, 15, 25, 0.95);
+            --accent-green: #00ff66;
+            --accent-cyan: #00f0ff;
+            --accent-dim: #002211;
+            --text-main: #f0f4f8;
+            --text-muted: #8b9bb4;
+            --border-color: #121c2e;
+            --border-glow: rgba(0, 255, 102, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', Courier, monospace, 'Segoe UI', Roboto, sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        /* Ambient Background Glow */
+        .ambient-glow {
+            position: fixed;
+            top: -20vh;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60vw;
+            height: 40vh;
+            background: radial-gradient(circle, rgba(0, 255, 102, 0.04) 0%, rgba(0, 240, 255, 0.02) 40%, transparent 70%);
+            z-index: -3;
+            pointer-events: none;
+            filter: blur(80px);
+        }
+
+        /* Interactive Background Face Tracker */
+        .bg-face-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 500px;
+            height: 500px;
+            z-index: -2;
+            pointer-events: none;
+            opacity: 0.18;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            filter: drop-shadow(0 0 30px rgba(0, 255, 102, 0.2));
+        }
+
+        /* Cyber Head Silhouette */
+        .cyber-head {
+            position: relative;
+            width: 280px;
+            height: 360px;
+            border: 2px dashed rgba(0, 255, 102, 0.3);
+            border-radius: 140px 140px 100px 100px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 100px;
+            background: radial-gradient(circle, rgba(0,240,255,0.03) 0%, transparent 80%);
+        }
+
+        .cyber-head::after {
+            content: '';
+            position: absolute;
+            bottom: 40px;
+            width: 60px;
+            height: 2px;
+            background: var(--accent-cyan);
+            box-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        .eyes-row {
+            display: flex;
+            gap: 55px;
+        }
+
+        .eye-socket {
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--accent-green);
+            border-radius: 50%;
+            background: rgba(0, 255, 102, 0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: inset 0 0 10px rgba(0, 255, 102, 0.2);
+            position: relative;
+        }
+
+        .pupil {
+            width: 18px;
+            height: 18px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            position: absolute;
+            box-shadow: 0 0 12px var(--accent-cyan);
+            transition: transform 0.05s ease-out;
+        }
+
+        /* CRT Scanline Overlay */
+        body::after {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            z-index: 999;
+            background-size: 100% 4px, 4px 100%;
+            pointer-events: none;
+        }
+
+        /* Matrix Canvas Background */
+        #matrix-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.12;
+            pointer-events: none;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(1, 2, 4, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 8%;
+            z-index: 1000;
+            animation: slideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--accent-green);
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
+        }
+
+        .logo::before {
+            content: ">";
+            animation: blink 1s infinite;
+        }
+
+        .logo span {
+            color: var(--accent-cyan);
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2.5rem;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            letter-spacing: 1.5px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: var(--accent-green);
+            transition: width 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: var(--accent-green);
+            text-shadow: 0 0 8px rgba(0, 255, 102, 0.5);
+        }
+
+        nav ul li a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        header.hero {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            align-items: center;
+            padding: 9rem 8% 4rem;
+            gap: 4rem;
+            position: relative;
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .hero-badge {
+            background: rgba(0, 255, 102, 0.05);
+            border: 1px solid rgba(0, 255, 102, 0.25);
+            color: var(--accent-green);
+            padding: 0.4rem 1rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-bottom: 1.5rem;
+            letter-spacing: 1.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.08);
+            animation: floatBadge 3s ease-in-out infinite;
+        }
+
+        .hero-badge::before {
+            content: "";
+            width: 7px;
+            height: 7px;
+            background-color: var(--accent-green);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--accent-green);
+            animation: pulse-dot 1.5s infinite;
+        }
+
+        header.hero h1 {
+            font-size: clamp(2.5rem, 4vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 1.2rem;
+            line-height: 1.15;
+            letter-spacing: -0.5px;
+        }
+
+        header.hero h1 span {
+            color: var(--accent-green);
+            text-shadow: 0 0 25px rgba(0, 255, 102, 0.35);
+        }
+
+        header.hero p {
+            font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+            color: var(--text-muted);
+            max-width: 520px;
+            margin-bottom: 2.2rem;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.2rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.8rem;
+            border-radius: 4px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+            font-size: 0.8rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-green);
+            color: #010204;
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.25);
+            border: 1px solid var(--accent-green);
+        }
+
+        .btn-primary:hover {
+            background-color: transparent;
+            color: var(--accent-green);
+            box-shadow: 0 0 30px rgba(0, 255, 102, 0.45);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Interactive Terminal Mockup */
+        .terminal-box {
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 255, 102, 0.03);
+            width: 100%;
+            animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            position: relative;
+        }
+
+        .terminal-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-green), transparent);
+        }
+
+        .terminal-header {
+            background: rgba(8, 11, 18, 0.95);
+            padding: 0.8rem 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .terminal-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .t-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .t-red { background: #ff5f56; box-shadow: 0 0 6px rgba(255, 95, 86, 0.4); }
+        .t-yellow { background: #ffbd2e; box-shadow: 0 0 6px rgba(255, 189, 46, 0.4); }
+        .t-green { background: #27c93f; box-shadow: 0 0 6px rgba(39, 201, 63, 0.4); }
+
+        .terminal-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+        }
+
+        .terminal-body {
+            padding: 1.5rem;
+            height: 310px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            scroll-behavior: smooth;
+        }
+
+        .terminal-body::-webkit-scrollbar {
+            width: 5px;
+        }
+        .terminal-body::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+        }
+        .terminal-body::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        .t-output {
+            color: var(--text-muted);
+            white-space: pre-line;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .t-output span {
+            color: var(--accent-green);
+            text-shadow: 0 0 8px rgba(0, 255, 102, 0.25);
+        }
+
+        .t-prompt-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent-cyan);
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.25);
+        }
+
+        .t-input {
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-family: monospace;
+            font-size: 0.85rem;
+            outline: none;
+            flex-grow: 1;
+        }
+
+        /* Sections */
+        section {
+            padding: 7rem 8%;
+            border-top: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            margin-bottom: 3.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            letter-spacing: -0.5px;
+        }
+
+        .section-title span {
+            color: var(--accent-green);
+            font-size: 0.95rem;
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
+        }
+
+        /* About Grid */
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2.2rem;
+        }
+
+        .card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            padding: 2.8rem 2.5rem;
+            border-radius: 6px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-green), transparent);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .card:hover {
+            border-color: var(--border-glow);
+            background-color: var(--surface-hover);
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(0, 255, 102, 0.15);
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1.2rem;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card h3::before {
+            content: "#";
+            color: var(--accent-green);
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
+        }
+
+        /* Skills Tags */
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+        }
+
+        .skill-tag {
+            background: rgba(0, 240, 255, 0.02);
+            border: 1px solid rgba(0, 240, 255, 0.12);
+            color: var(--accent-cyan);
+            padding: 0.8rem 1.4rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            letter-spacing: 0.5px;
+        }
+
+        .skill-tag:hover {
+            background: rgba(0, 240, 255, 0.08);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+            transform: translateY(-3px);
+        }
+
+        /* Contact Section */
+        .contact-box {
+            text-align: center;
+            max-width: 640px;
+            margin: 0 auto;
+            background: var(--surface-color);
+            border: 1px solid var(--border-color);
+            padding: 3.5rem;
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .contact-box::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+        }
+
+        .contact-box p {
+            color: var(--text-muted);
+            margin-bottom: 2.2rem;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-size: 1.05rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2.5rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            background: rgba(1, 2, 4, 0.95);
+        }
+
+        /* Animations */
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @keyframes pulse-dot {
+            0% { box-shadow: 0 0 0 0 rgba(0, 255, 102, 0.6); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 255, 102, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 255, 102, 0); }
+        }
+
+        @keyframes floatBadge {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 968px) {
+            header.hero {
+                grid-template-columns: 1fr;
+                padding-top: 8rem;
+                gap: 3.5rem;
+            }
+            nav ul {
+                display: none;
+            }
+            section {
+                padding: 5rem 6%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow"></div>
+    <canvas id="matrix-canvas"></canvas>
+
+    <!-- Interactive Background Face Tracker -->
+    <div class="bg-face-container">
+        <div class="cyber-head">
+            <div class="eyes-row">
+                <div class="eye-socket">
+                    <div class="pupil" id="left-pupil"></div>
+                </div>
+                <div class="eye-socket">
+                    <div class="pupil" id="right-pupil"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">ANURAG<span>.KUMAR</span></div>
+        <ul>
+            <li><a href="#about">// 01. ABOUT</a></li>
+            <li><a href="#skills">// 02. SKILLS</a></li>
+            <li><a href="#contact">// 03. CONTACT</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">SEC_OPS // SYSTEM ONLINE</div>
+            <h1>Hi, I'm <span>Anurag Kumar</span></h1>
+            <p>Ethical hacker & penetration tester specializing in vulnerability assessment, web application security, and network protocol defense.</p>
+            <div class="cta-buttons">
+                <a href="#contact" class="btn btn-primary">Initialize Contact</a>
+                <a href="#skills" class="btn btn-secondary">Explore Stack</a>
+            </div>
+        </div>
+
+        <!-- Interactive Terminal Widget -->
+        <div class="terminal-box">
+            <div class="terminal-header">
+                <div class="terminal-buttons">
+                    <div class="t-dot t-red"></div>
+                    <div class="t-dot t-yellow"></div>
+                    <div class="t-dot t-green"></div>
+                </div>
+                <div class="terminal-title">root@anurag-sec:~# bash</div>
+                <div style="width: 40px;"></div>
+            </div>
+            <div class="terminal-body" id="terminal-body">
+                <div class="t-output">Type <span>'help'</span> to see available commands or click quick action buttons below.</div>
+                <div class="t-output">>> Initializing security sandbox... [OK]</div>
+            </div>
+            <div style="padding: 0 1.5rem 1.5rem; display: flex; gap: 8px; align-items: center;">
+                <div class="t-prompt-line">root@kali:~$</div>
+                <input type="text" id="terminal-input" class="t-input" placeholder="type a command (e.g. 'skills', 'whoami')..." autofocus>
+            </div>
+        </div>
+    </header>
+
+    <!-- About Section -->
+    <section id="about">
+        <div class="section-title"><span>01.</span>// ABOUT ME</div>
+        <div class="about-grid">
+            <div class="card">
+                <h3>Mindset</h3>
+                <p>Analyzing systems from an attacker's perspective to discover logic flaws, edge-case vulnerabilities, and security architecture gaps before malicious actors do.</p>
+            </div>
+            <div class="card">
+                <h3>Penetration Testing</h3>
+                <p>Executing structured security assessments across web apps and internal corporate networks using industry-standard methodologies and custom tools.</p>
+            </div>
+            <div class="card">
+                <h3>Networking Infrastructure</h3>
+                <p>Decoding packets, analyzing TCP/IP behaviors, inspecting routing configurations, and securing enterprise traffic flow at the transport layer.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills">
+        <div class="section-title"><span>02.</span>// CORE EXPERTISE</div>
+        <div class="skills-container">
+            <div class="skill-tag">Ethical Hacking</div>
+            <div class="skill-tag">Penetration Testing</div>
+            <div class="skill-tag">Network Architecture</div>
+            <div class="skill-tag">TCP/IP Stack</div>
+            <div class="skill-tag">Web Application Security</div>
+            <div class="skill-tag">Vulnerability Assessment</div>
+            <div class="skill-tag">Linux / Bash Scripting</div>
+            <div class="skill-tag">Traffic Analysis</div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact">
+        <div class="section-title"><span>03.</span>// SECURE CHANNEL</div>
+        <div class="contact-box">
+            <p>Ready to discuss a security collaboration, audit a project, or talk tech? Drop a transmission.</p>
+            <a href="mailto:your.email@example.com" class="btn btn-primary">Transmit Message</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 ANURAG KUMAR. PROTECTED & SECURE.</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Matrix Rain Effect
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const chars = '01ABCDEFHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz@#$%&*<>\\/';
+        const fontSize = 14;
+        let columns = Math.floor(canvas.width / fontSize);
+        let drops = [];
+
+        for (let i = 0; i < columns; i++) {
+            drops[i] = 1;
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(1, 2, 4, 0.08)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00ff66';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 35);
+
+        // Mouse Tracking Face Eyes
+        document.addEventListener('mousemove', (e) => {
+            const pupils = document.querySelectorAll('.pupil');
+            pupils.forEach(pupil => {
+                const rect = pupil.parentElement.getBoundingClientRect();
+                const eyeX = rect.left + rect.width / 2;
+                const eyeY = rect.top + rect.height / 2;
+
+                const angle = Math.atan2(e.clientY - eyeY, e.clientX - eyeX);
+                const distance = Math.min(12, Math.hypot(e.clientX - eyeX, e.clientY - eyeY) / 10);
+
+                const x = Math.cos(angle) * distance;
+                const y = Math.sin(angle) * distance;
+
+                pupil.style.transform = `translate(${x}px, ${y}px)`;
+            });
+        });
+
+        // Interactive Terminal Logic
+        const terminalInput = document.getElementById('terminal-input');
+        const terminalBody = document.getElementById('terminal-body');
+
+        const commands = {
+            'help': "Available commands:\n- whoami: Brief background\n- skills: List technical stack\n- contact: Get communication info\n- clear: Wipe terminal screen",
+            'whoami': "Anurag Kumar - Ethical Hacker, Penetration Tester, and Network Security Enthusiast.",
+            'skills': "Core Stack: Ethical Hacking, Pentesting, TCP/IP, Web Sec, Linux, Vulnerability Assessment.",
+            'contact': "Email: your.email@example.com | Secure transmission lines open."
+        };
+
+        terminalInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const cmd = terminalInput.value.trim().toLowerCase();
+                
+                // Print user command
+                const userLine = document.createElement('div');
+                userLine.className = 't-output';
+                userLine.innerHTML = `<span style="color: var(--accent-cyan);">root@kali:~$</span> ${terminalInput.value}`;
+                terminalBody.appendChild(userLine);
+
+                if (cmd === 'clear') {
+                    terminalBody.innerHTML = '<div class="t-output">Terminal cleared. Type <span>\'help\'</span> for instructions.</div>';
+                } else if (commands[cmd]) {
+                    const resLine = document.createElement('div');
+                    resLine.className = 't-output';
+                    resLine.innerText = commands[cmd];
+                    terminalBody.appendChild(resLine);
+                } else if (cmd !== '') {
+                    const errLine = document.createElement('div');
+                    errLine.className = 't-output';
+                    errLine.style.color = '#ff5f56';
+                    errLine.innerText = `Command not recognized: '${cmd}'. Type 'help' for options.`;
+                    terminalBody.appendChild(errLine);
+                }
+
+                terminalInput.value = '';
+                terminalBody.scrollTop = terminalBody.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>
